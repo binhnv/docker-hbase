@@ -1,0 +1,31 @@
+#!/usr/bin/env bash
+
+set -e
+
+
+g_app_dir=${HBASE_HOME}
+g_hadoop_namenode=${HD_NAMENODE_HOSTNAME}
+# Remove all double quote and pick the first host
+g_zk_host=${ZOOKEEPER_HOST//\"/}
+g_zk_host=`echo ${g_zk_host} | cut -f1 -d,`
+
+function on_exit {
+    ${g_app_dir}/bin/stop-hbase.sh
+    exit 0
+}
+trap on_exit SIGINT SIGHUP SIGTERM
+
+# Wait for zookeeper
+while true; do
+    dockerize -wait tcp://${g_zk_host}:2181 -timeout 2s
+    if [[ $? -eq 0 ]]; then
+        break
+    fi
+done
+
+my_service "wait" ${HD_SERVICE_NAME}
+
+su ${HBASE_USER} --preserve-environment -c ${g_app_dir}/bin/start-hbase.sh
+sleep infinity &
+
+wait $!
