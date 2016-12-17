@@ -2,14 +2,14 @@
 
 set -e
 
-
 g_app_dir=${HBASE_HOME}
-g_hadoop_namenode=${HD_NAMENODE_HOSTNAME}
 # Remove all double quote and pick the first host
 g_zk_host=${ZOOKEEPER_HOST//\"/}
 g_zk_host=`echo ${g_zk_host} | cut -f1 -d,`
 
 function on_exit {
+    ${g_app_dir}/bin/hbase-daemon.sh stop thrift
+    ${g_app_dir}/bin/hbase-daemon.sh stop rest
     ${g_app_dir}/bin/stop-hbase.sh
     exit 0
 }
@@ -25,7 +25,9 @@ done
 
 my_service "wait" ${HD_SERVICE_NAME}
 
-su ${HBASE_USER} --preserve-environment -c ${g_app_dir}/bin/start-hbase.sh
-sleep infinity &
+su ${HBASE_USER} --preserve-environment -c "${g_app_dir}/bin/start-hbase.sh"
+su ${HBASE_USER} --preserve-environment -c "${g_app_dir}/bin/hbase-daemon.sh start thrift -p ${HBASE_THRIFT_PORT} --infoport ${HBASE_THRIFT_INFO_PORT}"
+su ${HBASE_USER} --preserve-environment -c "${g_app_dir}/bin/hbase-daemon.sh start rest -p ${HBASE_REST_PORT} --infoport ${HBASE_REST_INFO_PORT}"
 
+sleep infinity &
 wait $!

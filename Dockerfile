@@ -1,4 +1,19 @@
-FROM binhnv/hbase-base
+FROM binhnv/hadoop-base
 MAINTAINER "Binh Van Nguyen <binhnv80@gmail.com>"
+
+ENV HBASE_LOG_DIR="${MY_APP_LOG_DIR}/hbase" \
+    HBASE_PID_DIR="${MY_APP_DATA_DIR}/hbase/pids" \
+    HBASE_USER="${MY_USER}" \
+    HBASE_MANAGES_ZK="false"
+
+WORKDIR ${HBASE_HOME}
+
+EXPOSE ${HBASE_MASTER_PORT} ${HBASE_MASTER_INFO_PORT}
+EXPOSE ${HBASE_REGIONSERVER_PORT} ${HBASE_REGIONSERVER_INFO_PORT}
+EXPOSE ${HBASE_THRIFT_PORT} ${HBASE_THRIFT_INFO_PORT}
+EXPOSE ${HBASE_REST_PORT} ${HBASE_REST_INFO_PORT}
+
+COPY scripts/build /my_build
+RUN /my_build/install.sh && rm -rf /my_build
 
 COPY services ${MY_SERVICE_DIR}
