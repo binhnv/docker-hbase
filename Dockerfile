@@ -4,9 +4,12 @@ MAINTAINER "Binh Van Nguyen <binhnv80@gmail.com>"
 ENV HBASE_LOG_DIR="${MY_APP_LOG_DIR}/hbase" \
     HBASE_PID_DIR="${MY_APP_DATA_DIR}/hbase/pids" \
     HBASE_USER="${MY_USER}" \
-    HBASE_MANAGES_ZK="false"
+    HBASE_MANAGES_ZK="false" \
+    HBASE_HEAPSIZE="512M" \
+    HBASE_SCHEMA_DIR="${MY_APP_DATA_DIR}/hbase/schema"
 
 WORKDIR ${HBASE_HOME}
+VOLUME ${HBASE_SCHEMA_DIR}
 
 EXPOSE ${HBASE_MASTER_PORT} ${HBASE_MASTER_INFO_PORT}
 EXPOSE ${HBASE_REGIONSERVER_PORT} ${HBASE_REGIONSERVER_INFO_PORT}
@@ -17,3 +20,4 @@ COPY scripts/build /my_build
 RUN /my_build/install.sh && rm -rf /my_build
 
 COPY services ${MY_SERVICE_DIR}
+COPY scripts/startup ${MY_STARTUP_DIR}
