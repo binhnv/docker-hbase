@@ -4,9 +4,12 @@ g_schema_dir=${HBASE_SCHEMA_DIR}
 g_keytab_file=${KRB_KEYTAB_DIR}/${MY_USER}.keytab
 
 h_name=`hostname`
-# Wait HBase master
+# Wait HBase master and Thrift
 while true; do
-    dockerize -wait tcp://${h_name}:${HBASE_MASTER_PORT} -timeout 2s
+    dockerize \
+        -wait tcp://${h_name}:${HBASE_MASTER_PORT} \
+        -wait tcp://${h_name}:${HBASE_THRIFT_PORT} \
+        -timeout 2s
     if [[ $? -eq 0 ]]; then
         break
     fi
