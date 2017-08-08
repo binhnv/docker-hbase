@@ -16,12 +16,8 @@ trap on_exit SIGINT SIGHUP SIGTERM
 my_service "unregister" ${HBASE_SERVICE_NAME}
 
 # Wait for zookeeper
-while true; do
-    dockerize -wait tcp://${g_zk_host}:2181 -timeout 2s
-    if [[ $? -eq 0 ]]; then
-        break
-    fi
-done
+my_tcp_wait ${g_zk_host} 2181
+# wait for Hadoop
 my_service "wait" ${HD_SERVICE_NAME}
 
 su ${HBASE_USER} --preserve-environment -c "${g_app_dir}/bin/start-hbase.sh"
